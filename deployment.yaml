@@ -29,3 +29,4 @@ spec:
       type: RollingUpdate
         maxSurge: 2
         maxUnavailable: 2   
+        ...
