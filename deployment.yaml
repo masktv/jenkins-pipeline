@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: application-deployment
+  name: masktv-application-deployment
   labels:
     app: masktv-ott
 spec:
