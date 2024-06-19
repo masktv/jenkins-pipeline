@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: application-deployment
+  labels:
+    app: masktv-ott
+spec:
+  template:
+    metadata:
+      labels:
+        app: masktv-ott
+    spec:
+      containers:
+        - name: application-container
+          image: ............ImageFromDockerhub...................
+          ports:
+            - containerPort: 80    # plz check 
+              name: http
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 200m     # plz check
+              memory: 100m  # plz check 
+    replicas: 5
+    selector: 
+      matchLabels:
+        app: masktv-ott          
+    strategy: 
+      type: RollingUpdate
+        maxSurge: 2
+        maxUnavailable: 2   
