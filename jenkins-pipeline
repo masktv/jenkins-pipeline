@@ -2,7 +2,7 @@ To clone git Repo
   1. Generate a Personal Access Token
         Repo setting --> Developer settings --> Personal access token
   2. Add Credentials in Jenkins
-        Manage Jenkins --> Manage Credentials --> Add Credentials --> Secret text {Paste your GitHub personal access token and give it a unique ID}  (e.g., github-token).
+        Manage Jenkins --> Manage Credentials --> Add Credentials --> username and password {Paste your GitHub personal access token and give it a unique ID}  (e.g., github-token).
   3. Create a Jenkins Pipeline Job
         
 Script:   
