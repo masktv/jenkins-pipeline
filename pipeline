@@ -1,0 +1,24 @@
+pipeline {
+    agent any 
+    environment {
+        GITHUB_CREDENTIALS = 'github-token' // Replace with your credentials ID
+        GITHUB_REPO = 'https://github.com/username/repo.git' // Replace with your repository URL
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                script {
+                    // Clone the repository using Git credentials
+                    checkout([$class: 'GitSCM', 
+                        branches: [[name: '*/main']], // Change to your default branch if necessary
+                        userRemoteConfigs: [[
+                            url: GITHUB_REPO,
+                            credentialsId: GITHUB_CREDENTIALS
+                        ]]
+                    ])
+                }
+            }
+        }
+    }  
+}
