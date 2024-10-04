@@ -3,7 +3,9 @@ pipeline {
     environment {
         GITHUB_CREDENTIALS = 'github-token' // Replace with your credentials ID
         GITHUB_REPO = 'https://github.com/username/repo.git' // Replace with your repository URL
-        
+        DOCKERHUB_CREDENTIALS = 'dockerhub-credentials' // Replace with your Docker Hub credentials ID
+        IMAGE_NAME = 'your-dockerhub-username/repo-name' // Change to your desired Docker image name
+        DOCKER_REGISTRY = 'your-private-registry.com' // Optional If using a private registry
     }
 
     stages {
