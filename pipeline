@@ -6,7 +6,11 @@ pipeline {
         DOCKERHUB_CREDENTIALS = 'dockerhub-credentials' // Replace with your Docker Hub credentials ID
         IMAGE_NAME = 'your-dockerhub-username/repo-name' // Change to your desired Docker image name
         DOCKER_REGISTRY = 'your-private-registry.com' // Optional If using a private registry
-    }
+        AWS_REGION = 'us-west-2'  // Change to your desired region
+        CLUSTER_NAME = 'my-cluster'  // Change to your existing cluster name
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')  // Use Jenkins credentials
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')  // Use Jenkins credentials
+}
 
     stages {
         stage('Clone Repository') {
@@ -41,6 +45,24 @@ pipeline {
                         // Push the Docker image
                         sh "docker push ${IMAGE_NAME}"
                     }
+                }
+            }
+        }
+        stage('Configure AWS CLI') {
+            steps {
+                script {
+                    sh """
+                    aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
+                    aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+                    aws configure set region ${AWS_REGION}
+                    """
+                }
+            }
+        }
+        stage('Cluster Configuration') {
+            steps {
+                script {
+                    sh "aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${AWS_REGION}"
                 }
             }
         }    
