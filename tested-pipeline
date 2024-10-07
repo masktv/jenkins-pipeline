@@ -1,3 +1,4 @@
+
 pipeline {
     agent any 
     environment {
@@ -7,8 +8,8 @@ pipeline {
         IMAGE_NAME = 'masktv/masktv:app' // Change to your desired Docker image name
         AWS_REGION = 'ap-south-1'  // Change to your desired region
         CLUSTER_NAME = 'my-cluster'  // Change to your existing cluster name
-        AWS_ACCESS_KEY_ID = 'AKIAXI'  // Use Jenkins credentials
-        AWS_SECRET_ACCESS_KEY = 'FPQbSd6Tc'  // Use Jenkins credentials
+        AWS_ACCESS_KEY_ID = 'C2XZB5IUZ'  // Use Jenkins credentials
+        AWS_SECRET_ACCESS_KEY = 'Fx+SJ5zCag1GJ'  // Use Jenkins credentials
 }
 
     stages {
@@ -24,6 +25,11 @@ pipeline {
                         ]]
                     ])
                 }
+            }
+        }
+        stage('approval') {
+            steps {
+                input 'you want to Deploy Application updated version?'
             }
         }
         stage('Build Docker Image') {
@@ -63,11 +69,6 @@ pipeline {
                 script {
                     sh "aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${AWS_REGION}"
                 }
-            }
-        }
-        stage('approval') {
-            steps {
-                input 'you want to Deploy Application updated version?'
             }
         }
         stage('Deploy to Kubernetes') {
