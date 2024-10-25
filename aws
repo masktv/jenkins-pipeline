@@ -1,3 +1,5 @@
+######## Refer this script to mention credential through env with aws credential plugin
+
 stages {
         stage('Configure AWS CLI') {
             steps {
