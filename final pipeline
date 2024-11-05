@@ -1,0 +1,96 @@
+pipeline {
+    agent any
+
+    environment {
+        GITHUB_CREDENTIALS = 'github-token' // Replace with your credentials ID
+        GITHUB_REPO = 'https://github.com/masktv/Masktv-Deployment.git' // Repository URL
+        DOCKERHUB_CREDENTIALS = 'dockerhub-credentials' // Replace with your Docker Hub credentials ID
+        IMAGE_NAME = 'masktv/masktv:app' // Docker image name
+        AWS_REGION = 'ap-south-1' // AWS region
+        CLUSTER_NAME = 'my-cluster' // EKS cluster name
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                script {
+                    // Clone the repository using Git credentials
+                    checkout([$class: 'GitSCM', 
+                        branches: [[name: '*/main']], // Adjust branch name if necessary
+                        userRemoteConfigs: [[
+                            url: GITHUB_REPO,
+                            credentialsId: GITHUB_CREDENTIALS
+                        ]]
+                    ])
+                }
+            }
+        }
+
+        stage('Approval') {
+            steps {
+                input message: 'Do you want to deploy the updated version of the application?', 
+                      parameters: [
+                          choice(name: 'Deploy', choices: ['Yes', 'No'], description: 'Proceed with deployment?')
+                      ]
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Ensure we're in the correct context for the Docker build
+                    docker.build(IMAGE_NAME, '.')
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    // Log in to Docker Hub (or private registry) using credentials from Jenkins
+                    withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin"
+                        
+                        // Push the Docker image to Docker Hub
+                        sh "docker push ${IMAGE_NAME}"
+                    }
+                }
+            }
+        }
+
+        stage('Configure AWS CLI') {
+            steps {
+                script {
+                    // Retrieve AWS credentials securely from Jenkins' credentials store
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
+                        // Set AWS credentials from Jenkins environment
+                        sh """
+                        aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
+                        aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+                        aws configure set region ${AWS_REGION}
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Cluster Configuration') {
+            steps {
+                script {
+                    // Update kubeconfig for the EKS cluster
+                    sh "aws eks update-kubeconfig --name ${CLUSTER_NAME} --region ${AWS_REGION}"
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    // Apply the Kubernetes configurations
+                    sh 'kubectl apply -f pod.yaml'
+                    sh 'kubectl apply -f service.yaml'
+                }
+            }
+        }
+    }
+}
