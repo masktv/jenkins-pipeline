@@ -1,3 +1,19 @@
+# Necessory plugin for jenkins 
+1. cloudbees docker build and publish
+2. docker api plugin
+3. docker common plugin
+4. docker plugin
+5. github
+6. kiubernetes plugin/ credential plugin
+7. ssh agent
+8. Credential plugin
+9. Credential binding plugin
+10. ssh build agent 
+11. Pipeline stage view
+12. aws credential 
+
+..................................................................
+
 To clone git Repo
   1. Generate a Personal Access Token
         Repo setting --> Developer settings --> Personal access token
