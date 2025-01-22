@@ -1,0 +1,72 @@
+pipeline {
+    agent any
+
+    environment {
+        GITHUB_CREDENTIALS = 'github-token'  // Replace with your GitHub credentials ID
+        GITHUB_REPO = 'https://github.com/masktv/Masktv-Deployment.git'  // Repository URL
+        IMAGE_NAME = 'masktv/masktv:app'  // Docker image name
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                script {
+                    // Clone the repository using Git credentials
+                    checkout([$class: 'GitSCM', 
+                        branches: [[name: '*/main']],  // Adjust branch name if necessary
+                        userRemoteConfigs: [[
+                            url: GITHUB_REPO,
+                            credentialsId: GITHUB_CREDENTIALS
+                        ]]
+                    ])
+                }
+            }
+        }
+
+        stage('Approval') {
+            steps {
+                input message: 'Do you want to deploy the updated version of the application?', 
+                      parameters: [
+                          choice(name: 'Deploy', choices: ['Yes', 'No'], description: 'Proceed with deployment?')
+                      ]
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Ensure we're in the correct context for the Docker build
+                    docker.build(IMAGE_NAME, '.')
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    // Push the Docker image to Docker Hub
+                    sh "docker push ${IMAGE_NAME}"
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    // Apply the Kubernetes configurations (kubeconfig and kubectl are assumed to be pre-configured on Jenkins)
+                    sh 'kubectl apply -f pod.yaml'  // Ensure this file exists in your repo
+                    sh 'kubectl apply -f service.yaml'  // Ensure this file exists in your repo
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment completed successfully!'
+        }
+        failure {
+            echo 'Deployment failed. Please check the logs for details.'
+        }
+    }
+}
