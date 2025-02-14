@@ -70,3 +70,5 @@ pipeline {
         }
     }
 }
+
+# need to make seperate pipeline for db and app
