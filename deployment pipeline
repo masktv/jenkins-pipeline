@@ -70,6 +70,6 @@ pipeline {
         }
     }
 }
-
+# Add this step to restart pod kubectl rollout restart deployment your-deployment-name
 # need to make seperate pipeline for db and app
 # docker build cmd rin with --arg to pass keys, use keys in using jenkins credentials
